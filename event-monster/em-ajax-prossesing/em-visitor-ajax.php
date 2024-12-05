@@ -87,9 +87,17 @@ if ( isset( $_POST['action'] ) ) {
 	if ( $action == 'download-visitor-list' ) {
 		$filter           = $_POST['filter'];
 		$upload_dir       = wp_upload_dir();
-		$create_file_path = $upload_dir['basedir'];
+		$create_file_path = $_POST['file_path'];
 		// file create and open
-		if ( $visitors_list_file = fopen( $create_file_path . '/visitors-list.csv', 'w' ) ) {
+		$base_dir = $upload_dir['basedir']; // Local path to the upload directory
+
+		// Extract the filename from the URL if it's coming as a full URL, safer to specify just a file name in the POST request
+		$filename = basename($create_file_path); // Get the base name of the file
+
+		// Construct the local file path
+		$local_file_path = $base_dir . '/' . $filename;
+
+		if ($visitors_list_file = fopen($local_file_path, "w")) {
 			// fetch all visitor form database
 			$first_line_to_write = "#, First Name, Last Name, Email, Phone, Event \n";
 			fwrite( $visitors_list_file, $first_line_to_write );
@@ -121,6 +129,28 @@ if ( isset( $_POST['action'] ) ) {
 			echo 'File not created.';
 		}
 	}
+	
+	if($action == "delete-visitor-list") {
+		// Assuming $create_file_path comes from $_POST['file_path'], you need to validate and sanitize it.
+		$create_file_path = $_POST['file_path'];
+
+		// Convert URL to local path
+		$upload_dir = wp_upload_dir(); // Get WordPress upload directory paths
+		$base_dir = $upload_dir['basedir']; // Local path to the upload directory
+
+		// Extract the filename from the URL if it's coming as a full URL, safer to specify just a file name in the POST request
+		$filename = basename($create_file_path); // Get the base name of the file
+
+		// Construct the local file path
+		$local_file_path = $base_dir . '/' . $filename;
+
+		if(file_exists($local_file_path)) {
+			unlink($local_file_path);
+			echo "File deleted.";
+		} else {
+			echo "File does not exist.";
+		}
+	} 
 
 	// show visitors list
 	if ( $action == 'showvisitor' ) {

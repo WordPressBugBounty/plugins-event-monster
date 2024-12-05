@@ -55,7 +55,7 @@ wp_enqueue_style( 'awl-em-activities-css', EM_PLUGIN_URL . 'css/activities.css' 
 								}
 								?>
 							</select>
-							<button class="btn btn-success" id="downloa_visitor" name="downloa_visitor" onclick="return DownloadVisitorList();"><i class="fa fa-download"></i> <?php esc_html_e( 'Download All Vsitor List', 'event-monster' ); ?></button>
+							<button class="btn btn-success" id="downloa_visitor" name="downloa_visitor" onclick="return DownloadVisitorList('<?php echo wp_create_nonce( 'em-download-visitor-nonce' ); ?>');"><i class="fa fa-download"></i> <?php esc_html_e( 'Download All Vsitor List', 'event-monster' ); ?></button>
 						</div>
 					</div>
 					<!--Finder for view-->
@@ -138,10 +138,13 @@ wp_enqueue_style( 'awl-em-activities-css', EM_PLUGIN_URL . 'css/activities.css' 
 <?php
 // inclue ajax prossesinf file
 require_once 'em-ajax-prossesing/em-visitor-ajax.php';
+
+$rand = rand(1,1000);
+$upload_dir = wp_upload_dir();
 ?>
 <script>
 //download Attendees list
-function DownloadVisitorList(){
+function DownloadVisitorList(nonce){
 	//get filter value
 	var filter = jQuery('#select_event').val();
 	
@@ -151,11 +154,23 @@ function DownloadVisitorList(){
 	DownloadallVisitorList.onreadystatechange = function() {
 		if (DownloadallVisitorList.readyState == 4 && DownloadallVisitorList.status == 200) {
 			if((DownloadallVisitorList.responseText.indexOf("file-created") >= 0)) {
-				<?php
-					$upload_dir      = wp_upload_dir();
-					$create_file_url = $upload_dir['baseurl'] . '/visitors-list.csv';
-				?>
-				window.open('<?php echo esc_js( $create_file_url ); ?>', '_blank');
+				var file_path = DownloadallVisitorList.responseText;
+				if(file_path !== "File not created.") {
+					<?php
+						$create_file_url = $upload_dir['baseurl'] . '/visitors-list-' . $rand . '.csv';
+					?>
+					var create_file_url = '<?php echo $create_file_url; ?>';
+					window.open('<?php echo esc_js( $create_file_url ); ?>', '_blank');
+					
+					// Now you need to send another request to delete the file
+                    var DeleteFileRequest = new XMLHttpRequest();
+					DeleteFileRequest.open("POST", location.href, true);
+					DeleteFileRequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+					DeleteFileRequest.send(`action=delete-visitor-list&file_path=${encodeURIComponent(create_file_url)}&nonce=${encodeURIComponent(nonce)}`);
+
+                } else {
+                    alert("File creation failed.");
+                }
 			}
 		}
 
@@ -163,11 +178,15 @@ function DownloadVisitorList(){
 			alert('File not found & object not responding.');
 			return false;
 		}
-	};		
+	};	
+
+	var create_file_url = '<?php echo $upload_dir['baseurl'] . '/visitors-list-' . $rand . '.csv'; ?>';
 	//data post by object
 	DownloadallVisitorList.open("POST", location.href, true);
 	DownloadallVisitorList.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	DownloadallVisitorList.send('action=download-visitor-list&filter='+filter);
+	//DownloadallVisitorList.send('action=download-visitor-list&filter='+filter + create_file_url + "&nonce=" + nonce);
+	DownloadallVisitorList.send(`action=download-visitor-list&filter=${encodeURIComponent(filter)}&file_path=${encodeURIComponent(create_file_url)}&nonce=${encodeURIComponent(nonce)}`);
+
 }
 
 //event visitor show

@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 Plugin Name: Event Monster
 Plugin URI: https://awplife.com/wordpress-plugins/event-monster-premium/
 Description: Event Monster For WordPress.
-Version: 1.4.3
+Version: 1.4.4
 Author: A WP Life
 Author URI: https://awplife.com/
 Text Domain: event-monster
@@ -46,9 +46,6 @@ function pippin_get_image_urls( $image_url ) {
 
     return $image_urls;
 }
-
-
-
 
 // Create tables if not exist
 // em_tickets
@@ -157,8 +154,6 @@ function awl_em_tables_create() {
 	);
 	add_option( 'awl_em_common_settings', $emdefaultsettings );
 
-
-
 }
 
 if ( ! class_exists( 'Awl_Event_Monster' ) ) {
@@ -170,7 +165,7 @@ if ( ! class_exists( 'Awl_Event_Monster' ) ) {
 
 		protected function _constants() {
 			// Plugin Version
-			define( 'EM_PLUGIN_VER', '1.4.3' );
+			define( 'EM_PLUGIN_VER', '1.4.4' );
 
 			// Plugin Text Domain
 			define( 'EM_TXTDM', 'event-monster' );
