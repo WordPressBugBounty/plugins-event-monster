@@ -208,7 +208,7 @@ if ( isset( $_POST['action'] ) ) {
 																<input type="text" name="form-phone" placeholder="<?php esc_html_e( $em_form_phone_field, 'event-monster' ); ?>" class="form-phone form-control em_tck_input" id="form-phone-<?php echo esc_attr( $em_id ); ?>">
 															</div>
 															<div class="em_reg_btn_align">
-																<button type="button" class="<?php echo esc_attr( $em_button ); ?>  em_reg_btn_size" onclick="return ApplyCouponTicket_<?php echo esc_attr( $em_id ); ?>('bookticket', '<?php echo esc_attr( $em_id ); ?>');"><i class="fa fa-ticket"></i> <?php esc_html_e( 'Book', 'event-monster' ); ?></button>
+																<button type="button" class="<?php echo esc_attr( $em_button ); ?>  em_reg_btn_size" onclick="return ApplyCouponTicket_<?php echo esc_attr( $em_id ); ?>('bookticket','<?php echo wp_create_nonce( 'em-bookticket-nonce' ); ?>','<?php echo esc_attr( $em_id ); ?>');"><i class="fa fa-ticket"></i> <?php esc_html_e( 'Book', 'event-monster' ); ?></button>
 															</div>
 														</div>
 													</div>
@@ -223,20 +223,23 @@ if ( isset( $_POST['action'] ) ) {
 										<?php
 										// save booking details
 										if ( isset( $_POST['action'] ) ) {
-											global $wpdb;
 											$action = $_POST['action'];
+											if ( $action == 'bookticket' ) {
+											
+											global $wpdb;
+											$nonce = $_POST['nonce'];
 											$id     = $_POST['id'];
 
 											$booking_table   = $wpdb->prefix . 'em_bookings';
 											$attendees_table = $wpdb->prefix . 'em_attendees';
-											if ( $action == 'bookticket' && $id == $em_id ) {
+											if ( $action == 'bookticket' && $id == $em_id && wp_verify_nonce( $nonce, 'em-bookticket-nonce' ) ) {
 												$em_tkt_ids             = array( '1' => 1 );
 												$em_tkt_quantity        = 1;
 												$coupon_id              = '';
 												$em_attendee_first_name = sanitize_text_field( $_POST['form-first-name'] );
 												$em_attendee_last_name  = sanitize_text_field( $_POST['form-last-name'] );
 												$em_attendee_email      = sanitize_email( $_POST['form-email'] );
-												$em_attendee_phone      = sanitize_text_field( $_POST['form-phone'] );
+												$em_attendee_phone      = preg_replace('/[^0-9]/', '', $_POST['form-phone']); // Remove non-numeric characters
 
 												// register attendee and get its id
 												$em_attendees     = $wpdb->insert(
@@ -299,7 +302,8 @@ if ( isset( $_POST['action'] ) ) {
 												}
 											}
 										}
-									} ?>
+									} 
+								}?>
 							</div>
 				  <?php } ?>
 						
@@ -405,8 +409,9 @@ if ( isset( $_POST['action'] ) ) {
 				});
 				
 			
-				function ApplyCouponTicket_<?php echo esc_js( $em_id ); ?>(action,id) {
-					if (action == "bookticket") {
+				function ApplyCouponTicket_<?php echo esc_js( $em_id ); ?>(action,nonce,id) {
+					
+					if (action == "bookticket") { 
 						//form validator
 						var fname = jQuery('#form-first-name-<?php echo esc_js( $em_id ); ?>').val();
 						if(fname == "") {
@@ -455,7 +460,7 @@ if ( isset( $_POST['action'] ) ) {
 						jQuery.ajax({
 							type: 'POST',
 							url: location.href,
-							data: jQuery('#em_tkt_book_form-<?php echo esc_js( $em_id ); ?>').serialize() + '&action=' + action + '&id=' + id,
+							data: jQuery('#em_tkt_book_form-<?php echo esc_js( $em_id ); ?>').serialize() + '&action=' + action + '&nonce=' + nonce + '&id=' + id,
 							success: function(response) {
 								jQuery('#ajax_resp').html(jQuery(response).find('div#ajax_form'));
 								jQuery("#em_input_load-<?php echo esc_js( $em_id ); ?>").hide();

@@ -429,6 +429,7 @@ function em_shortcode( $atts ) {
                                                 });
 
                                                 function SingleEvent<?php echo esc_js($em_id); ?>(action, id) {
+													
                                                     jQuery("#single_load_<?php echo esc_js($em_id); ?>").show();
                                                     if (action == "singleeventshow") {
                                                         jQuery.ajax({

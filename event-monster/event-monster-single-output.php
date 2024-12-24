@@ -202,7 +202,7 @@ $em_end_time_val   = date( $em_time_format, strtotime( $em_end_time ) );
 											<input type="text" name="form-phone" placeholder="<?php esc_html_e( $em_form_phone_field, 'event-monster' ); ?>" class="form-phone form-control em_tck_input" id="form-phone">
 										</div>
 										<div class="em_reg_btn_align">
-											<button type="button" class="<?php echo esc_attr( $em_button ); ?>  em_reg_btn_size" onclick="return ApplyCouponTicket('bookticket');"><i class="fa fa-ticket"></i> <?php esc_html_e( 'Book!', 'event-monster' ); ?></button>
+											<button type="button" class="<?php echo esc_attr( $em_button ); ?>  em_reg_btn_size" onclick="return ApplyCouponTicket('bookticket','<?php echo wp_create_nonce( 'em-bookticket-nonce' ); ?>');"><i class="fa fa-ticket"></i> <?php esc_html_e( 'Book!', 'event-monster' ); ?></button>
 										</div>
 									</div>
 								</div>
@@ -220,16 +220,18 @@ $em_end_time_val   = date( $em_time_format, strtotime( $em_end_time ) );
 					if ( isset( $_POST['action'] ) ) {
 						global $wpdb;
 						$action          = $_POST['action'];
+						$nonce          = $_POST['nonce'];
 						$booking_table   = $wpdb->prefix . 'em_bookings';
 						$attendees_table = $wpdb->prefix . 'em_attendees';
-						if ( $action == 'bookticket' ) {
+						if ( $action == 'bookticket' && wp_verify_nonce( $nonce, 'em-bookticket-nonce' )) {
 							$em_tkt_ids             = array( '1' => 1 );
 							$em_tkt_quantity        = 1;
 							$coupon_id              = '';
-							$em_attendee_first_name = $_POST['form-first-name'];
-							$em_attendee_last_name  = $_POST['form-last-name'];
-							$em_attendee_email      = $_POST['form-email'];
-							$em_attendee_phone      = $_POST['form-phone'];
+							// Sanitize and validate input
+							$em_attendee_first_name = sanitize_text_field($_POST['form-first-name']);
+							$em_attendee_last_name  = sanitize_text_field($_POST['form-last-name']);
+							$em_attendee_email      = sanitize_email($_POST['form-email']);
+							$em_attendee_phone      = preg_replace('/[^0-9]/', '', $_POST['form-phone']); // Remove non-numeric characters
 
 							// register attendee and get its id
 							$em_attendees     = $wpdb->insert(
@@ -399,7 +401,7 @@ jQuery("#coupon_code").keypress(function(){
 });
 
 // coupon
-function ApplyCouponTicket(action) {
+function ApplyCouponTicket(action,nonce) {
 	//alert(1);
 	if (action == "bookticket") {
 		//form validator
@@ -449,7 +451,7 @@ function ApplyCouponTicket(action) {
 		jQuery.ajax({
 			type: 'POST',
 			url: location.href,
-			data: jQuery('#em_tkt_book_form').serialize() + '&action=' + action,
+			data: jQuery('#em_tkt_book_form').serialize() + '&action=' + action+ '&nonce=' + nonce,
 			success: function(response) {
 				jQuery('#ajax_resp').html(jQuery(response).find('div#ajax_form'));
 				jQuery("#em_input_load").hide();
