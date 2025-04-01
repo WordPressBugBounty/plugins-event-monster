@@ -3,8 +3,8 @@ Contributors: awordpresslife, razipathhan, hanif0991, muhammadshahid, fkfaisalkh
 Donate link: https://paypal.me/awplife
 Tags: event, event plugin, event calendar, event manager, online tickets
 Requires at least: 4.0
-Tested up to: 6.7.1
-Stable tag: 1.4.5
+Tested up to: 6.7.2
+Stable tag: 1.4.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -194,7 +194,11 @@ https://wordpress.org/support/plugin/event-monster/
 
 == Changelog ==
 
-= 1.4.4 =
+= 1.4.6 =
+
+* Tested event monster on wordpress version 6.7.2
+
+= 1.4.5 =
 
 * Tested event monster on wordpress version 6.7.1
 * Form Submit CSRF Issue FIxed.

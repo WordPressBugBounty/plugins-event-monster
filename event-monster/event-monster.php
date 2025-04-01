@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 Plugin Name: Event Monster
 Plugin URI: https://awplife.com/wordpress-plugins/event-monster-premium/
 Description: Event Monster For WordPress.
-Version: 1.4.5
+Version: 1.4.6
 Author: A WP Life
 Author URI: https://awplife.com/
 Text Domain: event-monster
@@ -165,7 +165,7 @@ if ( ! class_exists( 'Awl_Event_Monster' ) ) {
 
 		protected function _constants() {
 			// Plugin Version
-			define( 'EM_PLUGIN_VER', '1.4.5' );
+			define( 'EM_PLUGIN_VER', '1.4.6' );
 
 			// Plugin Text Domain
 			define( 'EM_TXTDM', 'event-monster' );
